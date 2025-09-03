@@ -7,10 +7,8 @@
  * - userId: LINE 使用者 ID
  * - username: 使用者 LINE 顯示名稱
  * - items: 租用器材清單
- * - borrowedAt: 歸還日期（對應使用者輸入的「歸還日期」）
- * - returnedAt: 租用日期（對應使用者輸入的「租用日期」）
- *
- * 注意：borrowedAt 和 returnedAt 的命名與直覺相反，這是為了配合既有的資料結構
+ * - borrowedAt: 租用日期（對應使用者輸入的「租用日期」）
+ * - returnedAt: 歸還日期（對應使用者輸入的「歸還日期」）
  */
 
 /**

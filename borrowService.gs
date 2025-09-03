@@ -26,8 +26,8 @@ function handleBorrowForm_(event, rawText, userId) {
     userId,             // userId
     username,           // username
     parsed.items,       // items ← 租用器材
-    parsed.borrowedAt,  // borrowedAt ← 歸還日期（依指定映射）
-    parsed.returnedAt   // returnedAt ← 租用日期（依指定映射）
+    parsed.borrowedAt,  // borrowedAt ← 租用日期
+    parsed.returnedAt   // returnedAt ← 歸還日期
   ]);
 
   // 回覆確認訊息
@@ -36,8 +36,8 @@ function handleBorrowForm_(event, rawText, userId) {
       '✅ 已建立借用紀錄：',
       `借用人：${username}`,
       `器材：${parsed.items}`,
-      `租用日期：${formatDotDate_(parsed.returnedAt)}`,
-      `歸還日期：${formatDotDate_(parsed.borrowedAt)}`
+      `租用日期：${formatDotDate_(parsed.borrowedAt)}`,
+      `歸還日期：${formatDotDate_(parsed.returnedAt)}`
     ].join('\n')
   );
 }
@@ -90,14 +90,14 @@ function parseBorrowMessage_(raw) {
     return { ok: false, msg: '日期邏輯錯誤：歸還日期不可早於租用日期' };
   }
 
-  // 依指定映射：
+  // 正確的欄位映射：
   // 租用器材 → items
-  // 租用日期 → returnedAt
-  // 歸還日期 → borrowedAt
+  // 租用日期 → borrowedAt
+  // 歸還日期 → returnedAt
   return {
     ok: true,
     items,
-    returnedAt: rentDate, // 租用日期
-    borrowedAt: backDate  // 歸還日期
+    borrowedAt: rentDate, // 租用日期
+    returnedAt: backDate  // 歸還日期
   };
 }

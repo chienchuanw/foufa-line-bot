@@ -17,10 +17,10 @@ function replyBorrowedOnDate_(replyToken, ymdDot) {
 
   const rows = getLoanRows_(loans);
 
-  // 篩選規則：若「租用日期（returnedAt）」<= target <=「歸還日期（borrowedAt）」即視為該日占用中
+  // 篩選規則：若「租用日期（borrowedAt）」<= target <=「歸還日期（returnedAt）」即視為該日占用中
   const list = rows.filter(r => {
-    const rentStart = toDateOrNull_(r.returnedAt); // 租用日期（returnedAt）
-    const rentEnd = toDateOrNull_(r.borrowedAt); // 歸還日期（borrowedAt）
+    const rentStart = toDateOrNull_(r.borrowedAt); // 租用日期（borrowedAt）
+    const rentEnd = toDateOrNull_(r.returnedAt); // 歸還日期（returnedAt）
     if (!rentStart || !rentEnd) return false;
     const d = startOfDay_(target);
     return startOfDay_(rentStart) <= d && d <= startOfDay_(rentEnd);
@@ -39,12 +39,12 @@ function replyBorrowedOnDate_(replyToken, ymdDot) {
     const itemsBlock = itemsArr.length ? itemsArr.join('\n') : '（無器材資料）';
 
     // 加入日期範圍顯示
-    const rentStart = formatDotDate_(toDateOrNull_(r.returnedAt));
-    const rentEnd = formatDotDate_(toDateOrNull_(r.borrowedAt));
+    const rentStart = formatDotDate_(toDateOrNull_(r.borrowedAt));
+    const rentEnd = formatDotDate_(toDateOrNull_(r.returnedAt));
     const dateRange = `📅 ${rentStart} ~ ${rentEnd}`;
 
-    return `${username}(${dateRange})\n${itemsBlock}`;
-  }).join('\n\n'); // 每筆之間多一個空行分隔
+    return `${dateRange}\n**${username}**\n${itemsBlock}`;
+  }).join('\n\n');
 
   replyMessage_(replyToken, msg);
 }

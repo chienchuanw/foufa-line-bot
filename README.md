@@ -132,10 +132,8 @@
 | `userId` | LINE 使用者 ID | U1234567890abcdef... |
 | `username` | LINE 顯示名稱 | 張小明 |
 | `items` | 租用器材清單 | 相機A, 三腳架, 燈具 |
-| `borrowedAt` | 歸還日期 | 2025-09-12 |
-| `returnedAt` | 租用日期 | 2025-09-10 |
-
-> **注意**：由於歷史原因，`borrowedAt` 實際儲存歸還日期，`returnedAt` 實際儲存租用日期。
+| `borrowedAt` | 租用日期 | 2025-09-10 |
+| `returnedAt` | 歸還日期 | 2025-09-12 |
 
 ## 📁 檔案結構
 
