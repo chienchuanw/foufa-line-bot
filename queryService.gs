@@ -33,10 +33,17 @@ function replyBorrowedOnDate_(replyToken, ymdDot) {
   // 格式化回覆訊息：粗體 username，逐項器材換行顯示
   const msg = list.map(r => {
     const username = r.username || r.userId;
+
     // 把 items 用 , 或 ， 分隔後逐行顯示
     const itemsArr = String(r.items || '').split(/[，,]/).map(s => s.trim()).filter(Boolean);
     const itemsBlock = itemsArr.length ? itemsArr.join('\n') : '（無器材資料）';
-    return `*${username}*\n${itemsBlock}`;
+
+    // 加入日期範圍顯示
+    const rentStart = formatDotDate_(toDateOrNull_(r.returnedAt));
+    const rentEnd = formatDotDate_(toDateOrNull_(r.borrowedAt));
+    const dateRange = `📅 ${rentStart} ~ ${rentEnd}`;
+
+    return `${username}(${dateRange})\n${itemsBlock}`;
   }).join('\n\n'); // 每筆之間多一個空行分隔
 
   replyMessage_(replyToken, msg);
