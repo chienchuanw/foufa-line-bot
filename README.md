@@ -28,8 +28,15 @@
 ### 3. 設定 Google Apps Script
 
 1. 在 Google Sheets 中，點選「擴充功能」→「Apps Script」
-2. 刪除預設的 `Code.gs` 內容
-3. 將本專案的 `main.gs` 內容完整複製貼上
+2. 刪除預設的 `Code.gs` 檔案
+3. 將本專案的所有 `.gs` 檔案複製到專案中：
+   - `main.gs` - 主要入口點
+   - `config.gs` - 設定管理
+   - `dateUtils.gs` - 日期工具
+   - `sheetService.gs` - 試算表操作
+   - `lineService.gs` - LINE API 通訊
+   - `borrowService.gs` - 借用邏輯
+   - `queryService.gs` - 查詢功能
 4. 儲存專案（Ctrl+S）
 
 ### 4. 設定環境變數
@@ -130,11 +137,25 @@
 
 > **注意**：由於歷史原因，`borrowedAt` 實際儲存歸還日期，`returnedAt` 實際儲存租用日期。
 
+## 📁 檔案結構
+
+重構後的專案採用模組化設計，每個檔案負責特定功能：
+
+| 檔案 | 功能說明 | 主要內容 |
+|------|----------|----------|
+| `main.gs` | 主要路由與 Webhook 處理 | doGet, doPost, handleEvent_ |
+| `config.gs` | 設定與常數管理 | 工作表設定、訊息常數、Script Properties |
+| `dateUtils.gs` | 日期處理工具 | 日期解析、格式化、比較函式 |
+| `sheetService.gs` | Google Sheets 操作 | 工作表建立、資料讀寫、標題管理 |
+| `lineService.gs` | LINE API 通訊 | 訊息回覆、歡迎訊息、使用者資訊 |
+| `borrowService.gs` | 借用邏輯處理 | 表單解析、借用紀錄建立 |
+| `queryService.gs` | 查詢功能 | 日期查詢、指令說明 |
+
 ## 🔧 自訂設定
 
 ### 修改工作表名稱
 
-在 `main.gs` 第 21 行：
+在 `config.gs` 中：
 
 ```javascript
 const SHEET_LOANS = 'loans';  // 改為你想要的工作表名稱
@@ -142,7 +163,7 @@ const SHEET_LOANS = 'loans';  // 改為你想要的工作表名稱
 
 ### 修改欄位順序
 
-在 `main.gs` 第 22 行：
+在 `config.gs` 中：
 
 ```javascript
 const LOANS_HEADERS = ['ts', 'userId', 'username', 'items', 'borrowedAt', 'returnedAt'];
@@ -150,32 +171,11 @@ const LOANS_HEADERS = ['ts', 'userId', 'username', 'items', 'borrowedAt', 'retur
 
 ### 自訂錯誤訊息
 
-在 `main.gs` 第 23 行：
+在 `config.gs` 中：
 
 ```javascript
 const UNKNOWN_CMD_MSG = '目前沒有此指令，請使用「查指令」查看指令範例';
 ```
-
-## 🛠️ 進階功能
-
-### 新增自訂指令
-
-在 `handleEvent_` 函式中新增條件判斷：
-
-```javascript
-// 自訂指令範例
-if (/^我的借用紀錄$/.test(text)) {
-  return replyMyBorrowHistory_(event.replyToken, userId);
-}
-```
-
-### 修改歡迎訊息
-
-編輯 `sendGreeting_` 函式中的 Flex Message 內容。
-
-### 新增資料驗證
-
-在 `parseBorrowMessage_` 函式中加入額外的驗證邏輯。
 
 ## 🔍 疑難排解
 
