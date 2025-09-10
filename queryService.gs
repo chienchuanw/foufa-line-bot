@@ -50,6 +50,68 @@ function replyBorrowedOnDate_(replyToken, ymdDot) {
 }
 
 /**
+ * 查詢指定月份的器材租借狀況
+ * @param {string} replyToken - LINE 回覆 token
+ * @param {string} ymDot - 月份字串 (YYYY.MM)
+ */
+function replyBorrowedOnMonth_(replyToken, ymDot) {
+  const loans = getLoansSheet_();
+  if (!loans) return replyMessage_(replyToken, `找不到工作表：${SHEET_LOANS}`);
+
+  const monthInfo = parseDotMonth_(ymDot);
+  if (!monthInfo) return replyMessage_(replyToken, '月份格式錯誤，請用 YYYY.MM');
+
+  const rows = getLoanRows_(loans);
+
+  // 篩選規則：租借期間與指定月份有重疊的記錄
+  const list = rows.filter(r => {
+    const rentStart = toDateOrNull_(r.borrowedAt); // 租用日期
+    const rentEnd = toDateOrNull_(r.returnedAt);   // 歸還日期
+    if (!rentStart || !rentEnd) return false;
+
+    const borrowStart = startOfDay_(rentStart);
+    const borrowEnd = startOfDay_(rentEnd);
+    const monthStart = startOfDay_(monthInfo.startDate);
+    const monthEnd = startOfDay_(monthInfo.endDate);
+
+    // 檢查租借期間是否與指定月份有重疊
+    return borrowStart <= monthEnd && borrowEnd >= monthStart;
+  });
+
+  if (!list.length) {
+    const monthText = `${monthInfo.year} / ${monthInfo.month}`;
+    return replyMessage_(replyToken, `${monthText} 暫無器材借用紀錄。`);
+  }
+
+  // 按租用日期排序
+  list.sort((a, b) => {
+    const dateA = toDateOrNull_(a.borrowedAt);
+    const dateB = toDateOrNull_(b.borrowedAt);
+    return dateA - dateB;
+  });
+
+  // 格式化回覆訊息
+  const monthText = `${monthInfo.year} / ${monthInfo.month} 器材租借`;
+  const msg = list.map(r => {
+    const username = r.username || r.userId;
+
+    // 把 items 用 , 或 ， 分隔後逐行顯示
+    const itemsArr = String(r.items || '').split(/[，,]/).map(s => s.trim()).filter(Boolean);
+    const itemsBlock = itemsArr.length ? itemsArr.join('\n') : '（無器材資料）';
+
+    // 加入日期範圍顯示
+    const rentStart = formatDotDate_(toDateOrNull_(r.borrowedAt));
+    const rentEnd = formatDotDate_(toDateOrNull_(r.returnedAt));
+    const dateRange = `📅 ${rentStart} ~ ${rentEnd}`;
+
+    return `${dateRange}\n**${username}**\n${itemsBlock}`;
+  }).join('\n\n');
+
+  const fullMessage = `${monthText}\n\n${msg}`;
+  replyMessage_(replyToken, fullMessage);
+}
+
+/**
  * 產生指令說明文字
  * @returns {string} 指令說明內容
  */
@@ -63,8 +125,9 @@ function helpText_() {
     '租用日期：2025.09.10',
     '歸還日期：2025.09.12',
     '',
-    '2) 查器材 <YYYY.MM.DD>',
-    '範例：查器材 2025.09.11',
+    '2) 查器材 <YYYY.MM.DD> 或 <YYYY.MM>',
+    '範例：查器材 2025.09.11（查特定日期）',
+    '範例：查器材 2025.09（查整個月份）',
     '',
     '3) 查指令',
     '顯示所有指令與使用範例'

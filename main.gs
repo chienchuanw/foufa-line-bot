@@ -83,10 +83,16 @@ function handleEvent_(event) {
     return handleBorrowForm_(event, text, userId);
   }
 
-  // 查器材
-  const mQuery = text.match(/^查器材\s+(\d{4}\.\d{2}\.\d{2})$/);
-  if (mQuery) {
-    return replyBorrowedOnDate_(event.replyToken, mQuery[1]);
+  // 查器材（特定日期）
+  const mQueryDate = text.match(/^查器材\s+(\d{4}\.\d{2}\.\d{2})$/);
+  if (mQueryDate) {
+    return replyBorrowedOnDate_(event.replyToken, mQueryDate[1]);
+  }
+
+  // 查器材（指定月份）
+  const mQueryMonth = text.match(/^查器材\s+(\d{4}\.\d{2})$/);
+  if (mQueryMonth) {
+    return replyBorrowedOnMonth_(event.replyToken, mQueryMonth[1]);
   }
 
   // 未知指令：回覆提示訊息
