@@ -73,6 +73,32 @@ function getLoanRows_(sheet) {
 }
 
 /**
+ * 更新特定記錄的歸還日期
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet - 工作表物件
+ * @param {number} rowIndex - 要更新的行號（1-based）
+ * @param {Date} newReturnDate - 新的歸還日期
+ * @returns {boolean} 更新是否成功
+ */
+function updateRecordReturnDate_(sheet, rowIndex, newReturnDate) {
+  try {
+    const header = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    const returnedAtIndex = header.indexOf('returnedAt');
+
+    if (returnedAtIndex === -1) {
+      console.error('找不到 returnedAt 欄位');
+      return false;
+    }
+
+    // 更新指定行的 returnedAt 欄位（欄位索引+1因為是1-based）
+    sheet.getRange(rowIndex, returnedAtIndex + 1).setValue(newReturnDate);
+    return true;
+  } catch (error) {
+    console.error('更新歸還日期時發生錯誤:', error);
+    return false;
+  }
+}
+
+/**
  * 安全地取得儲存格值
  * @param {Array} row - 資料列
  * @param {number} i - 欄位索引

@@ -95,6 +95,17 @@ function handleEvent_(event) {
     return replyBorrowedOnMonth_(event.replyToken, mQueryMonth[1]);
   }
 
+  // 我的租借記錄
+  if (/^我的租借$/.test(text)) {
+    return replyMyBorrowRecords_(event.replyToken, userId);
+  }
+
+  // 刪除記錄
+  const mDelete = text.match(/^刪除\s+(\d+)$/);
+  if (mDelete) {
+    return handleDeleteRecord_(event, mDelete[1], userId);
+  }
+
   // 未知指令：回覆提示訊息
   return replyMessage_(event.replyToken, UNKNOWN_CMD_MSG);
 }

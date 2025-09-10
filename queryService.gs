@@ -112,6 +112,54 @@ function replyBorrowedOnMonth_(replyToken, ymDot) {
 }
 
 /**
+ * 查詢使用者自己的未來租借記錄（可刪除的記錄）
+ * @param {string} replyToken - LINE 回覆 token
+ * @param {string} userId - 使用者 ID
+ */
+function replyMyBorrowRecords_(replyToken, userId) {
+  const loans = getLoansSheet_();
+  if (!loans) return replyMessage_(replyToken, `找不到工作表：${SHEET_LOANS}`);
+
+  // 取得使用者的 LINE 顯示名稱
+  const username = fetchLineDisplayName_(userId) || '您';
+
+  const rows = getLoanRows_(loans);
+  const today = startOfDay_(new Date());
+
+  // 篩選條件：
+  // 1. 是該使用者的記錄
+  // 2. 歸還日期在今天或之後（進行中和未來的記錄）
+  const myActiveRecords = rows
+    .map((record, index) => ({ ...record, rowIndex: index + 2 })) // +2 因為有標題行
+    .filter(r => {
+      const isMyRecord = r.userId === userId;
+      const returnDate = toDateOrNull_(r.returnedAt);
+      const isActiveOrFuture = returnDate && startOfDay_(returnDate) >= today;
+      return isMyRecord && isActiveOrFuture;
+    });
+
+  if (!myActiveRecords.length) {
+    return replyMessage_(replyToken, '您目前沒有可操作的租借記錄。');
+  }
+
+  // 格式化回覆訊息
+  const recordList = myActiveRecords.map((r, index) => {
+    const itemsArr = String(r.items || '').split(/[，,]/).map(s => s.trim()).filter(Boolean);
+    const itemsBlock = itemsArr.length ? itemsArr.join(', ') : '（無器材資料）';
+
+    const rentStart = formatDotDate_(toDateOrNull_(r.borrowedAt));
+    const rentEnd = formatDotDate_(toDateOrNull_(r.returnedAt));
+
+    return `[${index + 1}] ${rentStart} ~ ${rentEnd}\n${itemsBlock}`;
+  }).join('\n\n');
+
+  const helpText = '\n\n輸入「刪除 <編號>」即可刪除\n例如：刪除 1';
+  const fullMessage = `📋 ${username}的租借記錄\n\n${recordList}${helpText}`;
+
+  replyMessage_(replyToken, fullMessage);
+}
+
+/**
  * 產生指令說明文字
  * @returns {string} 指令說明內容
  */
@@ -129,7 +177,10 @@ function helpText_() {
     '範例：查器材 2025.09.11（查特定日期）',
     '範例：查器材 2025.09（查整個月份）',
     '',
-    '3) 查指令',
+    '3) 我的租借',
+    '查看您的未來租借記錄，並進行刪除',
+    '',
+    '4) 查指令',
     '顯示所有指令與使用範例'
   ].join('\n');
 }
